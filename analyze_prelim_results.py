@@ -37,12 +37,13 @@ influence_extended_feat_importance = scaler4.fit_transform(np.sum(network_eqn_5,
 
 xax = np.arange(4)
 
-plt.plot(xax,mi_scores,label='Mutual Information Scores')
-plt.plot(xax,log_reg_coefs,label='Logistic Regression Coefs')
-plt.plot(xax,influence_control_feat_importance,label='Author Influence Function code via LogReg')
-plt.plot(xax,influence_extended_feat_importance,label='Influence Extended via NN')
+plt.plot(xax,mi_scores.reshape(-1),label='Mutual Information Scores')
+plt.plot(xax,log_reg_coefs.reshape(-1),label='Logistic Regression Coefs')
+plt.plot(xax,influence_control_feat_importance.reshape(-1),label='Author Influence Function code via LogReg')
+plt.plot(xax,influence_extended_feat_importance.reshape(-1),label='Influence Extended via NN')
 plt.xlabel('feature number (0-3)')
 plt.ylabel('Normalized Feature Score')
 plt.title('Comparison of Measured Feature Importance')
 plt.legend(loc='lower right',prop={'size':8})
+plt.xticks(np.arange(4))
 plt.show()
