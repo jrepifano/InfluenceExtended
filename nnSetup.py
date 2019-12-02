@@ -11,89 +11,87 @@ from __future__ import print_function
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils import data
 from sklearn.model_selection import train_test_split
-import influence
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+from torch.autograd import Variable
+from sklearn.metrics import accuracy_score
 
-class dataset(data.Dataset):
-    def __init__(self,X,Y):
-        self.X = X
-        self.Y = Y
-    def __len__(self):
-        return len(self.X)
-    def __getitem__(self,i):
-        x_i = torch.tensor(self.X[i,:])
-        y_i = torch.tensor(self.Y[i])
-        y_i = y_i.float()
-        x_i = x_i.float()
-        return x_i, y_i
-    
-X1 = np.load('X1.npy')
-X2 = np.load('X2.npy')
-X = (np.vstack([X1,X2]))
-y = np.hstack([np.zeros(50),np.ones(50)]).reshape((-1,1))
 
-num_classes = 2
-num_epochs = 1000
-batch_size = round(len(X)*1)
-learning_rate = 0.001
+class net(nn.Module):
+    def __init__(self):
+        super(net,self).__init__()
+
+        self.lin1 = nn.Linear(4,2)
+        self.lin2 = nn.Linear(2,1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self,x):
+
+        out1 = self.sigmoid(self.lin1(x))
+        out2 = self.sigmoid(self.lin2(out1))
+
+        return out2
+
+    def forward_with_stages(self,x):
+        x0 = self.lin1(x)
+        x1 = self.sigmoid(x0)
+        x2 = self.lin2(x1)
+        x3 = self.sigmoid(x2)
+
+        return x0,x1,x2,x3
+
+iris = load_iris()
+X = iris.data[:100,:]
+y = iris.target[:100]
+
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
 input_size = X.shape[1]
 
-X_train, X_test, Y_train, Y_test = train_test_split(X,y,test_size=0.2,random_state=1)
+r = np.random.RandomState(seed=1234567890)
 
-train_dataset = dataset(X_train, Y_train)
-test_dataset = dataset(X_test, Y_test)
+X_train, X_test, Y_train, Y_test = train_test_split(X,y,test_size=0.2,random_state=r)
 
-train_loader = data.DataLoader(train_dataset,batch_size=batch_size,shuffle=False)
-test_loader = data.DataLoader(test_dataset,batch_size=1,shuffle=False)
 
-model = nn.Sequential(
-        nn.Linear(input_size,1),
-        nn.Sigmoid())
+train_X = Variable(torch.Tensor(X_train).float())
+test_X = Variable(torch.Tensor(X_test).float())
+train_y = Variable(torch.Tensor(Y_train).float()).view(-1,1)
+test_y = Variable(torch.Tensor(Y_test).float()).view(-1,1)
 
 # Loss and optimizer
-criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
+model = net()
+
+criterion = nn.MSELoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+
+num_epochs = 10000
 # Train the model
-total_step = len(train_loader)
 for epoch in range(num_epochs):
     correct = 0
-    for j, (in_data, labels) in enumerate(train_loader):  
-        
-        # Forward pass
-        outputs = model(in_data)
-        loss = criterion(outputs, labels)
-        
-        # Backward and optimize
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        
-    #Accuracy
-    outputs = (outputs>0.5).float()
-    correct = (outputs == labels).float().sum()
-    print("Epoch {}/{}, Loss: {:.3f}, Accuracy: {:.3f}".format(epoch+1,num_epochs, loss.data, correct/outputs.shape[0]))
 
+    optimizer.zero_grad()
+    # Forward pass
+    outputs = model.forward(train_X)
+    loss = criterion(outputs, train_y)
+    # Backward and optimize
+    loss.backward()
+    optimizer.step()
 
-#Influence start
-outputs = model(in_data)
-loss = criterion(outputs,labels)
-J = torch.autograd.grad(loss,model.parameters(),create_graph=True)
-H = torch.autograd.grad(torch.sum(J[0]),model.parameters())
+    if epoch % 100 == 0 or epoch==num_epochs-1:
+        outputs = (outputs>0.5).float()
+        correct = (outputs == train_y).float().sum()
+        predict_out = model(test_X)
+        predict_y = torch.round(predict_out)
+        print("Epoch {}/{}, Loss: {:.3f}, Training Acc: {:.3f}, Test Acc: {:.3f}".format(
+            epoch+1,num_epochs, loss.data, correct/outputs.shape[0], accuracy_score(test_y.data, predict_y.data)))
 
-    
-    
-#test_index = 0
-#
-#test_x = torch.tensor([X_test[test_index,:]]).float()
-#test_x.requires_grad=True
-#test_y = torch.tensor([Y_test[test_index]]).long()
-#
-#test_output = model(test_x)
-#test_loss = criterion(test_output,test_y)
-#
-#
-##define HVP subroutine - layer by layer influence?
-#grads = torch.autograd.grad(test_loss,model.parameters(),create_graph=True) 
+torch.save(model,'model.pt')
+np.save('x_train.npy',X_train)
+np.save('y_train.npy',Y_train)
+np.save('x_test.npy',X_test)
+np.save('y_test.npy',Y_test)
+
 
