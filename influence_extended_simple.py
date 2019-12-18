@@ -106,3 +106,5 @@ for i in range(len(train_X)):
     eqn_2 = np.vstack((eqn_2,infl.detach().numpy())) if eqn_2.size else infl.detach().numpy()
     eqn_5 = np.vstack((eqn_5,i_pert[0].detach().numpy())) if eqn_5.size else i_pert[0].detach().numpy()
 
+# np.save('eqn_2_extended_lin1.npy',eqn_2)
+# np.save('eqn_5_extended_lin1.npy',eqn_5)

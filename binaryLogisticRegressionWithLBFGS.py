@@ -103,7 +103,7 @@ class BinaryLogisticRegressionWithLBFGS(LogisticRegressionWithLBFGS):
                     test_grad_loss_no_reg_val,
                     approx_type,
                     approx_params)
-                np.savez(approx_filename, inverse_hvp=inverse_hvp)
+                # np.savez(approx_filename, inverse_hvp=inverse_hvp)
                 print('Saved inverse HVP to %s' % approx_filename)
         else:
             inverse_hvp = test_grad_loss_no_reg_val

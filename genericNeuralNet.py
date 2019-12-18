@@ -780,7 +780,7 @@ class GenericNeuralNet(object):
                 approx_type,
                 approx_params,
                 verbose=verbose)
-            np.savez(approx_filename, inverse_hvp=inverse_hvp)
+            # np.savez(approx_filename, inverse_hvp=inverse_hvp)
             if verbose: print('Saved inverse HVP to %s' % approx_filename)            
         
         duration = time.time() - start_time
