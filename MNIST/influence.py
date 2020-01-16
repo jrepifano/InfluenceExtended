@@ -12,42 +12,42 @@ import matplotlib.pyplot as plt
 import numpy as np
 from torch.autograd import grad
 
-class Model(torch.nn.Module):
-    def __init__(self):
-        super(Model, self).__init__()
-        self.conv_1 = torch.nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, stride=1, padding=1)
-        self.linear_1 = torch.nn.Linear(25088, 100)
-        # self.linear_2 = torch.nn.Linear(100,10)
-        self.selu = torch.nn.SELU()
-        self.softmax = torch.nn.Softmax(dim=1)
-
-    def forward(self, x):
-        x = self.conv_1(x)
-        x = self.selu(x)
-        x = x.reshape(x.size(0), -1)
-        x = self.linear_1(x)
-        # x = self.selu(x)
-        # x = self.linear_2(x)
-        pred = self.softmax(x)
-
-        return pred
-
 # class Model(torch.nn.Module):
 #     def __init__(self):
 #         super(Model, self).__init__()
-#         self.linear_1 = torch.nn.Linear(784, 100)
-#         self.linear_2 = torch.nn.Linear(100,10)
+#         self.conv_1 = torch.nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, stride=1, padding=1)
+#         self.linear_1 = torch.nn.Linear(25088, 100)
+#         # self.linear_2 = torch.nn.Linear(100,10)
 #         self.selu = torch.nn.SELU()
 #         self.softmax = torch.nn.Softmax(dim=1)
 
 #     def forward(self, x):
+#         x = self.conv_1(x)
+#         x = self.selu(x)
 #         x = x.reshape(x.size(0), -1)
 #         x = self.linear_1(x)
-#         x = self.selu(x)
-#         x = self.linear_2(x)
+#         # x = self.selu(x)
+#         # x = self.linear_2(x)
 #         pred = self.softmax(x)
 
 #         return pred
+
+class Model(torch.nn.Module):
+    def __init__(self):
+        super(Model, self).__init__()
+        self.linear_1 = torch.nn.Linear(784, 100)
+        self.linear_2 = torch.nn.Linear(100,10)
+        self.selu = torch.nn.SELU()
+        self.softmax = torch.nn.Softmax(dim=1)
+
+    def forward(self, x):
+        x = x.reshape(x.size(0), -1)
+        x = self.linear_1(x)
+        x = self.selu(x)
+        x = self.linear_2(x)
+        pred = self.softmax(x)
+
+        return pred
 
 # class Model(torch.nn.Module):
 #     def __init__(self):
@@ -74,7 +74,7 @@ def hessian_vector_product(ys,xs,v):
     J.backward(v,retain_graph=True)
     return xs.grad
 
-model_type = 'cnn'
+model_type = 'mlp'
 model = torch.load(model_type +'.pt')
 
 mnist_trainset = torch.load('mnist_trainset.pt')
@@ -166,8 +166,8 @@ for i in range(len(image)):
     i_pert = grad(infl,x)
     i_pert = i_pert[0].view(1,28,28)
 
-    eqn_2 = np.vstack((eqn_2,infl.detach().cpu().numpy())) if eqn_2.size else infl.detach().cpu().numpy()
-    eqn_5 = np.vstack((eqn_5,i_pert.detach().cpu().numpy())) if eqn_5.size else i_pert.detach().cpu().numpy()
+    eqn_2 = np.vstack((eqn_2,-infl.detach().cpu().numpy())) if eqn_2.size else -infl.detach().cpu().numpy()
+    eqn_5 = np.vstack((eqn_5,-i_pert.detach().cpu().numpy())) if eqn_5.size else -i_pert.detach().cpu().numpy()
     
     
 sort = np.argsort(eqn_2.reshape(-1))

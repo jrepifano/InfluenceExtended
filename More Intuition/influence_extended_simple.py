@@ -75,7 +75,7 @@ for i in range(recursion_depth):
     hvp = hessian_vector_product(train_loss, model.lin2.weight, cur_estimate)
     cur_estimate = [a+(1-damping)*b-c/scale for (a,b,c) in zip(v,cur_estimate,hvp)]
     cur_estimate = torch.squeeze(torch.stack(cur_estimate)).view(1,-1)
-
+    model.zero_grad()
     if (i % print_iter ==0) or (i==recursion_depth-1):
         numpy_est = cur_estimate[0].detach().numpy()
         numpy_est = numpy_est.reshape(1,-1)####
@@ -93,7 +93,7 @@ eqn_5 = np.array([])
 ihvp = ihvp.detach()
 for i in range(len(train_X)):
     x = torch.tensor(train_X[i],requires_grad=True)
-    # model.zero_grad()
+    model.zero_grad()
     x0,x1,x2,x_out = model.forward_with_stages(x)
     x_loss = criterion(x_out,train_y[0])
     x_loss.backward(create_graph=True)
@@ -103,8 +103,8 @@ for i in range(len(train_X)):
     infl = (torch.dot(ihvp.view(1,-1).squeeze(),grads.view(-1,1).squeeze())/num_train_samples)
     i_pert = grad(infl,x)
 
-    eqn_2 = np.vstack((eqn_2,infl.detach().numpy())) if eqn_2.size else infl.detach().numpy()
-    eqn_5 = np.vstack((eqn_5,i_pert[0].detach().numpy())) if eqn_5.size else i_pert[0].detach().numpy()
+    eqn_2 = np.vstack((eqn_2,-infl.detach().numpy())) if eqn_2.size else -infl.detach().numpy()
+    eqn_5 = np.vstack((eqn_5,-i_pert[0].detach().numpy())) if eqn_5.size else -i_pert[0].detach().numpy()
 
-# np.save('results/eqn_2_extended_lin2.npy',eqn_2)
-# np.save('results/eqn_5_extended_lin2.npy',eqn_5)
+np.save('results/eqn_2_extended_lin2.npy',eqn_2)
+np.save('results/eqn_5_extended_lin2.npy',eqn_5)

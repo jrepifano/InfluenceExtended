@@ -143,8 +143,8 @@ for i in range(len(image)):
     i_pert = grad(infl,x)
     i_pert = i_pert[0].view(1,3,32,32)
 
-    eqn_2 = np.vstack((eqn_2,infl.detach().cpu().numpy())) if eqn_2.size else infl.detach().cpu().numpy()
-    eqn_5 = np.vstack((eqn_5,i_pert.detach().cpu().numpy())) if eqn_5.size else i_pert.detach().cpu().numpy()
+    eqn_2 = np.vstack((eqn_2,-infl.detach().cpu().numpy())) if eqn_2.size else -infl.detach().cpu().numpy()
+    eqn_5 = np.vstack((eqn_5,-i_pert.detach().cpu().numpy())) if eqn_5.size else -i_pert.detach().cpu().numpy()
     
     
 sort = np.argsort(eqn_2.reshape(-1))
