@@ -25,13 +25,13 @@ print(feat_names[top_5_coefs])
 
 
 
-Influence Functions top 15 features:
+# Influence Functions top 15 features:
 
-['INR_max' 'BICARBONATE_min' 'SODIUM_max' 'WBC_max' 'POTASSIUM_min'
- 'PLATELET_min' 'alt' 'day1pao2' 'CHLORIDE_min' 'CREATININE_max' 'age'
- 'calcium' 'BUN_max' 'ALBUMIN_min' 'POTASSIUM_max']
+# ['INR_max' 'BICARBONATE_min' 'SODIUM_max' 'WBC_max' 'POTASSIUM_min'
+#  'PLATELET_min' 'alt' 'day1pao2' 'CHLORIDE_min' 'CREATININE_max' 'age'
+#  'calcium' 'BUN_max' 'ALBUMIN_min' 'POTASSIUM_max']
 
-Logistic Regression top 15 features:
-['BICARBONATE_min' 'CHLORIDE_min' 'LACTATE_max' 'WBC_min' 'WBC_max'
- 'HEMATOCRIT_min' 'BUN_min' 'BUN_max' 'SODIUM_max' 'CHLORIDE_max'
- 'BILIRUBIN_max' 'PT_max' 'BANDS_max' 'SODIUM_min' 'age']
+# Logistic Regression top 15 features:
+# ['BICARBONATE_min' 'CHLORIDE_min' 'LACTATE_max' 'WBC_min' 'WBC_max'
+#  'HEMATOCRIT_min' 'BUN_min' 'BUN_max' 'SODIUM_max' 'CHLORIDE_max'
+#  'BILIRUBIN_max' 'PT_max' 'BANDS_max' 'SODIUM_min' 'age']
