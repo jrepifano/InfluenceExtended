@@ -9,16 +9,37 @@ import numpy as np
 import pandas as pd
 import save_plots
 
-probs = np.load('results/probs/mlp_probs.npy')
-test_labels = np.load('results/probs/mlp_test_labels.npy')
+# probs = np.load('results/probs/mlp_probs.npy')
+# test_labels = np.load('results/probs/mlp_test_labels.npy')
 
-save_plots.save_plots('MLP No SMOTE',None,None,None,test_labels,probs[:,1])
+# save_plots.save_plots('MLP No SMOTE',None,None,None,test_labels,probs[:,1])
 
-# column_names = np.load('data/column_names.npy',allow_pickle=True)
-# coefs = np.load('results/coefs.npy')
-# coefs = np.mean(coefs,axis=0)
-# logreg_top_feats = np.argsort(abs(coefs))
-# survey_results = pd.read_csv('results/survey_results.csv')
+survey_results = pd.read_csv('results/survey_results.csv')
+feat_names = survey_results.columns.values
+survey_top_feats = np.flip(np.argsort(survey_results.values))
 
-# feat_names = survey_results.columns.values
-# survey_top_feats = np.argsort(survey_results.values)
+column_names = np.load('data/column_names.npy',allow_pickle=True)
+coefs = np.load('results/coefs.npy')
+coefs = np.mean(coefs,axis=0)
+logreg_top_feats = np.flip(np.argsort(abs(coefs)))
+
+mi_score = np.load('results/mi_scores.npy')
+mi_top_feats = np.flip(np.argsort(mi_score))
+
+xgb_shap = np.load('results/xgb_shap_sums_no_smote.npy')
+xgb_top_feats = np.flip(np.argsort(abs(xgb_shap)))
+
+mlp_shap = np.load('results/mlp_shap_values_sums.npy')
+mlp_shap_top_feats = np.flip(np.argsort(abs(mlp_shap)))
+
+eqn_2 = np.load('results/eqn_2-test_set.npy')
+eqn_5 = np.load('results/eqn_5-test_set.npy')
+
+infl_feat_importance = np.sum(eqn_5,axis=0)
+infl_top_feats = np.flip(np.argsort(abs(infl_feat_importance)))
+
+for i in range(10):
+    print(column_names[infl_top_feats[i]])
+
+
+print(np.load('results/mlp_influence_time.npy')/60)

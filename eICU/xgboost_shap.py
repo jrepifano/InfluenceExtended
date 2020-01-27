@@ -24,7 +24,7 @@ x_imputed, y_imputed = sm.fit_resample(x_scaled,y)
 feat_names = np.load('data/column_names.npy',allow_pickle=True)
 
 model = xgboost.train({"gamma":0,"learning_rate": 0.01,"max_depth":2,"min_child_weight":0.1,
-                       "n_estimators":50,"random_state":2}, xgboost.DMatrix(x_imputed, label=y_imputed), 100)
+                       "n_estimators":50,"random_state":2}, xgboost.DMatrix(x_scaled, label=y), 100)
 
 # explain the model's predictions using SHAP
 # (same syntax works for LightGBM, CatBoost, scikit-learn and spark models)
