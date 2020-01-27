@@ -65,13 +65,16 @@ test_labels = np.array([])
 i = 1
 print('Starting CV Loop')
 for train_index,test_index in kf.split(x_scaled):
-    x_resampled,y_resampled = SMOTE().fit_resample(x_scaled[train_index],y[train_index])
+    # x_resampled,y_resampled = SMOTE().fit_resample(x_scaled[train_index],y[train_index])
+    x_resampled = x_scaled[train_index]
+    y_resampled = y[train_index]
+    
     logReg = LogisticRegression()
     xg = xgboost.XGBClassifier()
     # print('Starting LogReg grid search')
     # clf1 = GridSearchCV(logReg,logReg_params,make_scorer(roc_auc_score),iid=False,cv=5,refit=True,n_jobs=-1).fit(x_resampled,y_resampled)
     print('Starting xgb grid search')
-    clf2 = GridSearchCV(xg,xgb_params,make_scorer(roc_auc_score),iid=False,cv=5,refit=True,n_jobs=5).fit(x_resampled,y_resampled)
+    clf2 = GridSearchCV(xg,xgb_params,make_scorer(roc_auc_score),iid=False,cv=5,refit=True,n_jobs=3).fit(x_resampled,y_resampled)
 
     # pd.DataFrame(clf1.cv_results_).to_csv('results/logreg_cv_results_'+str(i)+'.csv')
     pd.DataFrame(clf2.cv_results_).to_csv('results/xgb_cv_results_'+str(i)+'.csv')
@@ -87,7 +90,7 @@ for train_index,test_index in kf.split(x_scaled):
     print('Done Fold: '+str(i) +'/5')
     i+=1
     
-# np.save('results/logreg_probs.npy',logreg_probs)
-np.save('results/xgb_probs.npy',xgb_probs)
-# np.save('results/coefs.npy',coefs)
-np.save('results/probs/test_labels_xgb.npy',test_labels)
+# np.save('results/logreg_probs_no_resampling.npy',logreg_probs)
+np.save('results/xgb_probs_no_resampling.npy',xgb_probs)
+# np.save('results/coefs_no_resampling.npy',coefs)
+np.save('results/probs/test_labels_xgb_no_resampling.npy',test_labels)
