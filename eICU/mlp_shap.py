@@ -12,6 +12,7 @@ import shap
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 import matplotlib.pyplot as plt
+import time
 
 class Model(torch.nn.Module):
     def __init__(self):
@@ -118,10 +119,12 @@ plt.title("Loss Plots")
 plt.legend(loc='upper right')
 plt.show()
 
-
+start_time = time.time()
 e = shap.DeepExplainer(model, x_train.float().to(device))
 shap_values = e.shap_values(x_test.float().to(device))
 shap.summary_plot(shap_values, x_train.float().to(device), plot_type="bar")
 
 np.save('results/mlp_shap_values.npy',shap_values)
 
+elapsed_time = time.time()-start_time
+np.save('results/mlp_shap_time',elapsed_time)

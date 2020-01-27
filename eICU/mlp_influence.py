@@ -10,6 +10,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from torch.autograd import grad
+import time
 
 class Model(torch.nn.Module):
     def __init__(self):
@@ -108,6 +109,7 @@ for epoch in range(no_epochs):
     if(epoch % print_iter == 0 or epoch == no_epochs-1):
         print('\nEpoch: {}/{}, Train Loss: {:.8f}, Test Loss: {:.8f}'.format(epoch + 1, no_epochs, total_train_loss, total_val_loss))
 
+start_time = time.time()
 model.zero_grad()
     
 train_loss = criterion(model(x_train),y_train)
@@ -162,3 +164,6 @@ for i in range(len(x_train)):
     
 np.save('results/eqn_2-test_set.npy',eqn_2)
 np.save('results/eqn_5-test_set.npy',eqn_5)
+
+elapsed_time = time.time()-start_time
+np.save('results/mlp_influence_time',elapsed_time)
