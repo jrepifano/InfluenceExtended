@@ -11,6 +11,7 @@ import torch
 from sklearn.model_selection import KFold
 from imblearn.over_sampling import SMOTE
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
 
 class Model(torch.nn.Module):
     def __init__(self):
@@ -31,7 +32,7 @@ class Model(torch.nn.Module):
 
         return pred
 
-x_scaled = np.load('data/x_scaled.npy')
+x_imputed = np.load('data/x_imputed.npy')
 y = np.load('data/y.npy')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -46,17 +47,23 @@ no_epochs = 2000
 
 kf = KFold(n_splits=5)
 
-print_iter = 500
+print_iter = 100
 
-for train_index, test_index in kf.split(x_scaled,y):
+for train_index, test_index in kf.split(x_imputed,y):
 
-    # sm = SMOTE()
-    # x_resampled, y_resampled = sm.fit_resample(x_scaled[train_index], y[train_index])
+    scaler = StandardScaler()
+    x_train = scaler.fit_transform(x_imputed[train_index])
+    y_train = y[train_index]
     
-    x_train = torch.from_numpy(x_scaled[train_index])
-    x_test = torch.from_numpy(x_scaled[test_index])
-    y_train = torch.from_numpy(y[train_index])
-    y_test = torch.from_numpy(y[test_index])
+    x_test = scaler.transform(x_imputed[test_index])
+    y_test = y[test_index]
+    
+    x_train,y_train = SMOTE().fit_resample(x_train,y_train)
+    
+    x_train = torch.from_numpy(x_train)
+    x_test = torch.from_numpy(x_test)
+    y_train = torch.from_numpy(y_train)
+    y_test = torch.from_numpy(y_test)
    
     train_loss = []
     val_loss = []
@@ -122,6 +129,6 @@ for train_index, test_index in kf.split(x_scaled,y):
     plt.show()
 
 
-np.save('results/probs/mlp_probs.npy',mlp_probs)
-np.save('results/probs/mlp_test_labels.npy',test_labels)
-torch.save(model,'mlp.pt')
+np.save('results/probs/smote/mlp_probs.npy',mlp_probs)
+np.save('results/probs/smote/mlp_test_labels.npy',test_labels)
+# torch.save(model,'mlp.pt')

@@ -18,7 +18,7 @@ y = np.load('data/y.npy')
 
 sm = SMOTE()
 
-x_imputed, y_imputed = sm.fit_resample(x_scaled,y)
+x_resampled, y_resampled = sm.fit_resample(x_scaled,y)
 
 
 feat_names = np.load('data/column_names.npy',allow_pickle=True)
@@ -29,6 +29,6 @@ model = xgboost.train({"gamma":0,"learning_rate": 0.01,"max_depth":2,"min_child_
 # explain the model's predictions using SHAP
 # (same syntax works for LightGBM, CatBoost, scikit-learn and spark models)
 explainer = shap.TreeExplainer(model)
-shap_values = explainer.shap_values(x_imputed)
+shap_values = explainer.shap_values(x_scaled)
 
-shap.summary_plot(shap_values, x_imputed, plot_type="bar")
+shap.summary_plot(shap_values, x_scaled, plot_type="bar")

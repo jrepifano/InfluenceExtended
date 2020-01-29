@@ -11,6 +11,8 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from torch.autograd import grad
 import time
+from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import SMOTE
 
 class Model(torch.nn.Module):
     def __init__(self):
@@ -38,7 +40,7 @@ def hessian_vector_product(ys,xs,v):
     
 r = np.random.RandomState(seed=1234567890)
 
-x_scaled = np.load('data/x_scaled.npy')
+x_imputed = np.load('data/x_imputed.npy')
 y = np.load('data/y.npy')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -47,7 +49,7 @@ if(torch.cuda.is_available()):
 
 model = Model()
 criterion = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.5, momentum=0.9)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.05, momentum=0.9)
 
 mlp_probs = np.array([])
 test_labels = np.array([])
@@ -58,7 +60,15 @@ train_loss = list()
 val_loss = list()
 best_val_loss = 1
 
-x_train,x_test,y_train,y_test = train_test_split(x_scaled,y,test_size=0.3333,random_state=r)
+sm = SMOTE()
+
+x_train,x_test,y_train,y_test = train_test_split(x_imputed,y,test_size=0.1,random_state=r)
+
+scaler = StandardScaler()
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.transform(x_test)
+    
+# x_train, y_train = sm.fit_resample(x_train, y_train)
 
 x_train = torch.from_numpy(x_train).float().to(device)
 x_test = torch.from_numpy(x_test).float().to(device)
@@ -162,8 +172,8 @@ for i in range(len(x_train)):
     eqn_5 = np.vstack((eqn_5,-i_pert.detach().cpu().numpy())) if eqn_5.size else -i_pert.detach().cpu().numpy()
     model.zero_grad()
     
-np.save('results/eqn_2-test_set.npy',eqn_2)
-np.save('results/eqn_5-test_set.npy',eqn_5)
+np.save('results/eqn_2-test_set-no_smote.npy',eqn_2)
+np.save('results/eqn_5-test_set-no_smote.npy',eqn_5)
 
 elapsed_time = time.time()-start_time
-np.save('results/mlp_influence_time',elapsed_time)
+# np.save('results/mlp_influence_time',elapsed_time)

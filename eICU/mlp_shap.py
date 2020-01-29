@@ -13,6 +13,7 @@ from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 import matplotlib.pyplot as plt
 import time
+from sklearn.preprocessing import StandardScaler
 
 class Model(torch.nn.Module):
     def __init__(self):
@@ -35,11 +36,12 @@ class Model(torch.nn.Module):
     
 r = np.random.RandomState(seed=1234567890)
 
-x_scaled = np.load('data/x_scaled.npy')
+x_imputed = np.load('data/x_imputed.npy')
 y = np.load('data/y.npy')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 if(torch.cuda.is_available()):
+    torch.cuda.set_device(1)
     print('Using device:', torch.cuda.get_device_name(torch.cuda.current_device()))
 
 model = Model()
@@ -57,9 +59,13 @@ best_val_loss = 1
 
 sm = SMOTE()
 
-x_train,x_test,y_train,y_test = train_test_split(x_scaled,y,test_size=0.3333,random_state=r)
+x_train,x_test,y_train,y_test = train_test_split(x_imputed,y,test_size=0.3333,random_state=r)
 
-# x_train, y_train = sm.fit_resample(x_train, y_train)
+scaler = StandardScaler()
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.transform(x_test)
+    
+x_train, y_train = sm.fit_resample(x_train, y_train)
 
 x_train = torch.from_numpy(x_train)
 x_test = torch.from_numpy(x_test)
@@ -124,7 +130,7 @@ e = shap.DeepExplainer(model, x_train.float().to(device))
 shap_values = e.shap_values(x_test.float().to(device))
 shap.summary_plot(shap_values, x_train.float().to(device), plot_type="bar")
 
-np.save('results/mlp_shap_values.npy',shap_values)
+np.save('results/mlp_shap_values_smote.npy',shap_values)
 
 elapsed_time = time.time()-start_time
-np.save('results/mlp_shap_time',elapsed_time)
+# np.save('results/mlp_shap_time',elapsed_time)
