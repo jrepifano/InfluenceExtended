@@ -31,7 +31,7 @@ column_names = np.load('data/column_names.npy',allow_pickle=True)
 # xgb_top_feats = np.flip(np.argsort(abs(xgb_shap)))
 
 
-mlp_shap = np.load('results/mlp_shap_values_no_smote.npy')
+mlp_shap = np.load('results/mlp_shap_values_smote.npy')
 sums = np.sum(np.sum((mlp_shap[0],mlp_shap[1]),axis=1),axis=0)
 mlp_shap_top_feats = np.flip(np.argsort(abs(sums)))
 
@@ -42,7 +42,7 @@ infl_feat_importance = np.sum(eqn_5,axis=0)
 infl_top_feats = np.flip(np.argsort(abs(infl_feat_importance)))
 
 for i in range(10):
-    print(column_names[infl_top_feats[i]])
+    print(column_names[mlp_shap_top_feats[i]])
 
 
 # print(np.load('results/mlp_influence_time.npy')/60)

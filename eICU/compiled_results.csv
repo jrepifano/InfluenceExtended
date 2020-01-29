@@ -14,7 +14,7 @@ Logistic Regression Coefficients (SMOTE),CHLORIDE_max,BICARBONATE_min,LACTATE_ma
 XGBoost Shap (no SMOTE),PT_max,LACTATE_max,BICARBONATE_min,BUN_max,INR_max,PLATELET_min,ALBUMIN_min,day1motor,HEMATOCRIT_min,GLUCOSE_min,,
 XGBoost Shap SMOTE,LACTATE_max,BICARBONATE_min,day1motor,BUN_max,INR_max,ALBUMIN_min,age,BILIRUBIN_max,patientunitstayid,aids,,
 MLP Shap via DeepLIFT (no SMOTE),gender,day1motor,age,BILIRUBIN_max,diabetes,patientunitstayid,BICARBONATE_min,hepaticfailure,SODIUM_min,SODIUM_max,,
-MLP Shap via DeepLIFT (SMOTE),,,,,,,,,,,,
+MLP Shap via DeepLIFT (SMOTE),,SODIUM_max,BICARBONATE_min,diabetes,WBC_max,SODIUM_min,ANIONGAP_max,day1motor,ALBUMIN_min,BUN_max,CHLORIDE_max,
 MLP Influence Functions (no SMOTE),ALBUMIN_min,LACTATE_max,aids,BICARBONATE_min,PT_max,age,ANIONGAP_max,BILIRUBIN_max,CHLORIDE_min,metastaticcancer,,
 MLP Influence Functions (SMOTE),CHLORIDE_max,LACTATE_max,INR_max,BICARBONATE_min,PT_max,SODIUM_max,day1motor,BUN_max,hepaticfailure,diabetes,,
 ,,,,,,,,,,,,
