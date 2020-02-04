@@ -17,6 +17,8 @@ def imshow(img):
 eqn_2_test_set = np.load('results/eqn_2-test_set.npy')
 eqn_5_test_set = np.load('results/eqn_5-test_set.npy')
 
+eqn_5_test_set = np.mean(eqn_5_test_set,axis=0)
+
 train_images = np.load('results/train_images.npy')
 train_labels = np.load('results/train_labels.npy')
 
@@ -27,17 +29,19 @@ channel_1_scaler = MinMaxScaler()
 channel_2_scaler = MinMaxScaler()
 channel_3_scaler = MinMaxScaler()
 
-channel_1 = eqn_5_test_set[:,0,:,:].reshape(-1,1024).transpose()
-channel_2 = eqn_5_test_set[:,1,:,:].reshape(-1,1024).transpose()
-channel_3 = eqn_5_test_set[:,2,:,:].reshape(-1,1024).transpose()
+channel_1 = eqn_5_test_set[0,:,:].reshape(-1,1024).transpose()
+channel_2 = eqn_5_test_set[1,:,:].reshape(-1,1024).transpose()
+channel_3 = eqn_5_test_set[2,:,:].reshape(-1,1024).transpose()
+
 
 channel_1 = channel_1_scaler.fit_transform(channel_1).transpose().reshape(-1,1,32,32)
 channel_2 = channel_2_scaler.fit_transform(channel_2).transpose().reshape(-1,1,32,32)
 channel_3 = channel_3_scaler.fit_transform(channel_3).transpose().reshape(-1,1,32,32)
 
-eqn_5_scaled = np.hstack((channel_1,channel_2,channel_3))
+eqn_5_scaled = np.hstack((channel_1,channel_2,channel_3)).reshape(3,32,32)
 
-imshow(train_images[3126])
-plt.imshow(np.transpose(eqn_5_scaled[3126], (1, 2, 0)))
+plt.imshow(np.transpose(eqn_5_scaled,(1,2,0)))
+# imshow(train_images[3126])
+# plt.imshow(np.transpose(eqn_5_scaled[3126], (1, 2, 0)))
 
-cnn_rank = np.argsort(eqn_2_test_set[:,0])
+# cnn_rank = np.argsort(eqn_2_test_set[:,0])

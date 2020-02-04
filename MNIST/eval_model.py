@@ -53,9 +53,9 @@ class Model(torch.nn.Module):
     
 model = torch.load('cnn_2.pt')
 
-mnist_trainset = torch.load('mnist_trainset.pt')
-mnist_testset = torch.load('mnist_testset.pt')
-mnist_valset = torch.load('mnist_valset.pt')
+mnist_trainset = torch.load('data/mnist_trainset.pt')
+mnist_testset = torch.load('data/mnist_testset.pt')
+mnist_valset = torch.load('data/mnist_valset.pt')
 
 train_dataloader = torch.utils.data.DataLoader(mnist_trainset, batch_size=64, shuffle=True)
 val_dataloader = torch.utils.data.DataLoader(mnist_valset, batch_size=32, shuffle=False)
