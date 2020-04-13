@@ -1,0 +1,39 @@
+program: train_mlp_wandb_cv.py
+command:
+  - ${env}
+  - python
+  - ${program}
+  - ${args}
+method: bayes
+metric:
+  name: roc_auc
+  goal: maximize
+parameters:
+  layer_1:
+    distribution: q_uniform
+    min: 10
+    max: 200
+  layer_2:
+    distribution: q_uniform
+    min: 10
+    max: 200
+  lr:
+    distribution: uniform
+    min: 0
+    max: 1
+  weight_decay:
+    distribution: uniform
+    min: 0
+    max: 1
+  momentum:
+    distribution: uniform
+    min: 0
+    max: 1
+  no_epoch:
+    distribution: q_uniform
+    min: 500
+    max: 5000
+early_terminate:
+  type: hyperband
+  max_iter: 50
+  s: 2

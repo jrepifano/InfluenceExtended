@@ -1,0 +1,17 @@
+Using device: TITAN V
+Traceback (most recent call last):
+  File "train_mlp.py", line 88, in <module>
+    model = Model(layer_1_in=cmd_args.layer_1_in)
+  File "train_mlp.py", line 29, in __init__
+    self.linear_1 = torch.nn.Linear(20, layer_1_in)
+  File "c:\users\jake\anaconda3\envs\phd\lib\site-packages\torch\nn\modules\linear.py", line 76, in __init__
+    self.weight = Parameter(torch.Tensor(out_features, in_features))
+TypeError: new() received an invalid combination of arguments - got (str, int), but expected one of:
+ * (torch.device device)
+ * (torch.Storage storage)
+ * (Tensor other)
+ * (tuple of ints size, torch.device device)
+      didn't match because some of the arguments have invalid types: ([31;1mstr[0m, [31;1mint[0m)
+ * (object data, torch.device device)
+      didn't match because some of the arguments have invalid types: ([31;1mstr[0m, [31;1mint[0m)
+

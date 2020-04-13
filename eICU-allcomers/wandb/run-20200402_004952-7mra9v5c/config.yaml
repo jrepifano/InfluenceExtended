@@ -1,0 +1,31 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.8.31
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.6.8
+activation:
+  desc: null
+  value: 0
+layer_1:
+  desc: null
+  value: 195
+layer_2:
+  desc: null
+  value: 166
+lr:
+  desc: null
+  value: 0.2734005647767721
+momentum:
+  desc: null
+  value: 0.4699498403233281
+no_epoch:
+  desc: null
+  value: 4981
+weight_decay:
+  desc: null
+  value: 0.8811751633540598

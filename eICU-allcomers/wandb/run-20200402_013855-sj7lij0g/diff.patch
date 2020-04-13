@@ -1,0 +1,695 @@
+diff --git a/eICU-Prelim/format_data.py b/eICU-Prelim/format_data.py
+deleted file mode 100644
+index 9ecca10..0000000
+--- a/eICU-Prelim/format_data.py
++++ /dev/null
+@@ -1,31 +0,0 @@
+-# -*- coding: utf-8 -*-
+-"""
+-@author: epifanoj0
+-"""
+-
+-import pandas as pd
+-import numpy as np
+-
+-df = pd.read_csv('data/master.csv')
+-
+-data = df.iloc[:,:29]
+-labels = df.iloc[:,30]
+-
+-feat_names = data.columns
+-
+-np_data = data.values
+-
+-np.save('data/data.npy',np_data)
+-np.save('data/feat_names.npy',feat_names)
+-
+-
+-y = []
+-for i in range(len(labels)):
+-    if labels[i] == 'ALIVE':
+-        y.append(0)
+-    else:
+-        y.append(1)
+-
+-y = np.asarray(y)
+-
+-np.save('data/labels.npy',y)
+\ No newline at end of file
+diff --git a/eICU-Prelim/influence.py b/eICU-Prelim/influence.py
+deleted file mode 100644
+index 4bae781..0000000
+--- a/eICU-Prelim/influence.py
++++ /dev/null
+@@ -1,106 +0,0 @@
+-# -*- coding: utf-8 -*-
+-"""
+-Created on Wed Jan 22 00:07:33 2020
+-
+-@author: Jake
+-"""
+-
+-import torch
+-import numpy as np
+-from torch.autograd import grad
+-
+-class Model(torch.nn.Module):
+-    def __init__(self):
+-        super(Model, self).__init__()
+-        self.linear_1 = torch.nn.Linear(27, 100)
+-        self.linear_2 = torch.nn.Linear(100,2)
+-        self.selu = torch.nn.SELU()
+-        self.softmax = torch.nn.Softmax()
+-
+-    def forward(self, x):
+-        x = self.linear_1(x)
+-        x = self.selu(x)
+-        x = self.linear_2(x)
+-        pred = self.softmax(x)
+-
+-        return pred
+-
+-    
+-def hessian_vector_product(ys,xs,v):
+-    J = grad(ys,xs, create_graph=True)[0]
+-    J.backward(v,retain_graph=True)
+-    return xs.grad
+-
+-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+-print('Using device:', torch.cuda.get_device_name(torch.cuda.current_device()))
+-
+-x_train = np.load('data/x_train.npy')
+-x_test = np.load('data/x_test.npy')
+-y_train = np.load('data/y_train.npy')
+-y_test = np.load('data/y_test.npy')
+-
+-x_train = torch.from_numpy(x_train).float().to(device)
+-x_test = torch.from_numpy(x_test).float().to(device)
+-y_train = torch.from_numpy(y_train).long().to(device)
+-y_test = torch.from_numpy(y_test).long().to(device)
+-
+-model = torch.load('mlp.pt')
+-
+-if device:
+-    model.to(device)
+-    print('Moved to GPU')
+-    
+-criterion = torch.nn.CrossEntropyLoss()
+-
+-train_loss = criterion(model(x_train),y_train)
+-    
+-test_loss = criterion(model(x_test),y_test)
+-
+-test_loss.backward(create_graph=True)
+-
+-scale = 1000
+-damping = 1
+-num_samples = 1
+-recursion_depth=100
+-print_iter = recursion_depth/10
+-v = model.linear_2.weight.grad.clone()
+-cur_estimate = v.clone()
+-for i in range(recursion_depth):
+-    hvp = hessian_vector_product(train_loss, model.linear_2.weight, cur_estimate)
+-    cur_estimate = [a+(1-damping)*b-c/scale for (a,b,c) in zip(v,cur_estimate,hvp)]
+-    cur_estimate = torch.squeeze(torch.stack(cur_estimate))#.view(1,-1)
+-    model.zero_grad()
+-    if (i % print_iter ==0) or (i==recursion_depth-1):
+-        numpy_est = cur_estimate.detach().cpu().numpy()
+-        numpy_est = numpy_est.reshape(1,-1)
+-        print("Recursion at depth %s: norm is %.8lf" % (i,np.linalg.norm(np.concatenate(numpy_est))))
+-    ihvp = [b/scale for b in cur_estimate]
+-    ihvp = torch.squeeze(torch.stack(ihvp))
+-    ihvp = [a/num_samples for a in ihvp]
+-    ihvp = torch.squeeze(torch.stack(ihvp))
+-
+-print(ihvp)
+-
+-eqn_2 = np.array([])
+-eqn_5 = np.array([])
+-
+-ihvp = ihvp.detach()
+-for i in range(len(x_train)):
+-    x = x_train[i]
+-    x.requires_grad = True
+-    x_out = model(x.view(1,-1))
+-    x_loss = criterion(x_out,y_train[i].reshape(1))
+-    x_loss.backward(create_graph=True)
+-    grads = model.linear_2.weight.grad
+-    grads = grads.squeeze()
+-    
+-    infl = (torch.dot(ihvp.view(1,-1).squeeze(),grads.view(-1,1).squeeze())/len(x_train))
+-    i_pert = grad(infl,x)
+-    i_pert = i_pert[0]
+-
+-    eqn_2 = np.vstack((eqn_2,-infl.detach().cpu().numpy())) if eqn_2.size else -infl.detach().cpu().numpy()
+-    eqn_5 = np.vstack((eqn_5,-i_pert.detach().cpu().numpy())) if eqn_5.size else -i_pert.detach().cpu().numpy()
+-    model.zero_grad()
+-    
+-np.save('results/eqn_2-test_set.npy',eqn_2)
+-np.save('results/eqn_5-test_set.npy',eqn_5)
+\ No newline at end of file
+diff --git a/eICU-Prelim/mlp.pt b/eICU-Prelim/mlp.pt
+deleted file mode 100644
+index e312152..0000000
+Binary files a/eICU-Prelim/mlp.pt and /dev/null differ
+diff --git a/eICU-Prelim/results.py b/eICU-Prelim/results.py
+deleted file mode 100644
+index 76ec0d2..0000000
+--- a/eICU-Prelim/results.py
++++ /dev/null
+@@ -1,37 +0,0 @@
+-# -*- coding: utf-8 -*-
+-"""
+-Created on Wed Jan 22 01:25:01 2020
+-
+-@author: Jake
+-"""
+-
+-import numpy as np
+-
+-coefs = np.load('results/logreg_coefs.npy')
+-eqn_2 = np.load('results/eqn_2-test_set.npy')
+-eqn_5 = np.load('results/eqn_5-test_set.npy')
+-feat_names = np.load('data/feat_names.npy',allow_pickle=True)
+-
+-eqn_5_sum = np.sum(eqn_5,axis=0)
+-
+-eqn_5_sort = np.argsort(eqn_5_sum)
+-coefs_sort = np.argsort(abs(coefs))[0]
+-
+-top_5_infl = np.flip(eqn_5_sort[-15:])
+-top_5_coefs = np.flip(coefs_sort[-15:])
+-
+-print(feat_names[top_5_infl])
+-print(feat_names[top_5_coefs])
+-
+-
+-
+-# Influence Functions top 15 features:
+-
+-# ['INR_max' 'BICARBONATE_min' 'SODIUM_max' 'WBC_max' 'POTASSIUM_min'
+-#  'PLATELET_min' 'alt' 'day1pao2' 'CHLORIDE_min' 'CREATININE_max' 'age'
+-#  'calcium' 'BUN_max' 'ALBUMIN_min' 'POTASSIUM_max']
+-
+-# Logistic Regression top 15 features:
+-# ['BICARBONATE_min' 'CHLORIDE_min' 'LACTATE_max' 'WBC_min' 'WBC_max'
+-#  'HEMATOCRIT_min' 'BUN_min' 'BUN_max' 'SODIUM_max' 'CHLORIDE_max'
+-#  'BILIRUBIN_max' 'PT_max' 'BANDS_max' 'SODIUM_min' 'age']
+diff --git a/eICU-Prelim/results/Figure_1.png b/eICU-Prelim/results/Figure_1.png
+deleted file mode 100644
+index 89b2dc3..0000000
+Binary files a/eICU-Prelim/results/Figure_1.png and /dev/null differ
+diff --git a/eICU-Prelim/results/eqn_2-test_set.npy b/eICU-Prelim/results/eqn_2-test_set.npy
+deleted file mode 100644
+index 0902f47..0000000
+Binary files a/eICU-Prelim/results/eqn_2-test_set.npy and /dev/null differ
+diff --git a/eICU-Prelim/results/eqn_5-test_set.npy b/eICU-Prelim/results/eqn_5-test_set.npy
+deleted file mode 100644
+index 60a82ca..0000000
+Binary files a/eICU-Prelim/results/eqn_5-test_set.npy and /dev/null differ
+diff --git a/eICU-Prelim/results/logreg_coefs.npy b/eICU-Prelim/results/logreg_coefs.npy
+deleted file mode 100644
+index 746873d..0000000
+Binary files a/eICU-Prelim/results/logreg_coefs.npy and /dev/null differ
+diff --git a/eICU-Prelim/train_mlp.py b/eICU-Prelim/train_mlp.py
+deleted file mode 100644
+index db35b10..0000000
+--- a/eICU-Prelim/train_mlp.py
++++ /dev/null
+@@ -1,132 +0,0 @@
+-# -*- coding: utf-8 -*-
+-"""
+-@author: epifanoj0
+-"""
+-
+-import numpy as np
+-from sklearn.model_selection import train_test_split
+-from sklearn.linear_model import LogisticRegression
+-from sklearn.metrics import confusion_matrix
+-import matplotlib.pyplot as plt
+-import torch
+-from sklearn.preprocessing import StandardScaler
+-
+-x = np.load('data/data.npy')
+-y = np.load('data/labels.npy')
+-# feat_names = np.load('data/feat_names.npy') save in another format and fix this
+-
+-
+-# x_train,x_test,y_train,y_test = train_test_split(x[:,:27],y,test_size=0.2)
+-
+-# scaler = StandardScaler()
+-
+-# x_train = scaler.fit_transform(x_train)
+-
+-# x_test = scaler.transform(x_test)
+-
+-# np.save('data/x_train.npy',x_train)
+-# np.save('data/x_test.npy',x_test)
+-# np.save('data/y_train.npy',y_train)
+-# np.save('data/y_test.npy',y_test)
+-
+-x_train = np.load('data/x_train.npy')
+-x_test = np.load('data/x_test.npy')
+-y_train = np.load('data/y_train.npy')
+-y_test = np.load('data/y_test.npy')
+-
+-# clf = LogisticRegression(solver='lbfgs').fit(x_train,y_train)
+-
+-# y_test_pred = clf.predict(x_test)
+-# print(confusion_matrix(y_test,y_test_pred))
+-
+-# print(clf.score(x_test,y_test))
+-
+-# np.save('results/logreg_coefs.npy',clf.coef_)
+-
+-class Model(torch.nn.Module):
+-    def __init__(self):
+-        super(Model, self).__init__()
+-        self.linear_1 = torch.nn.Linear(27, 100)
+-        self.linear_2 = torch.nn.Linear(100,2)
+-        self.selu = torch.nn.SELU()
+-        self.softmax = torch.nn.Softmax()
+-
+-    def forward(self, x):
+-        x = self.linear_1(x)
+-        x = self.selu(x)
+-        x = self.linear_2(x)
+-        pred = self.softmax(x)
+-
+-        return pred
+-
+-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+-print('Using device:', torch.cuda.get_device_name(torch.cuda.current_device()))
+-
+-model = Model()
+-criterion = torch.nn.CrossEntropyLoss()
+-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+-
+-no_epochs = 500
+-train_loss = list()
+-val_loss = list()
+-best_val_loss = 1
+-
+-x_train = torch.from_numpy(x_train)
+-x_test = torch.from_numpy(x_test)
+-y_train = torch.from_numpy(y_train)
+-y_test = torch.from_numpy(y_test)
+-
+-if device:
+-    model.to(device)
+-    print('Moved to GPU')
+-
+-for epoch in range(no_epochs):
+-    total_train_loss = 0
+-    total_val_loss = 0
+-
+-    model.train()
+-    # training
+-
+-    image = (x_train).float().to(device)
+-    label = y_train.long().to(device)
+-
+-    optimizer.zero_grad()
+-    
+-    pred = model(image)
+-
+-    loss = criterion(pred, label)
+-    total_train_loss += loss.item()
+-
+-    loss.backward()
+-    optimizer.step()
+-
+-    train_loss.append(total_train_loss)
+-
+-    # validation
+-    model.eval()
+-    total = 0
+-
+-    image = (x_test).float().to(device)
+-    label = y_test.long().to(device)
+-    
+-    pred = model(image)
+-
+-    loss = criterion(pred, label)
+-    total_val_loss += loss.item()
+-
+-    val_loss.append(total_val_loss)
+-
+-    print('\nEpoch: {}/{}, Train Loss: {:.8f}, Test Loss: {:.8f}'.format(epoch + 1, no_epochs, total_train_loss, total_val_loss))
+-
+-fig=plt.figure(figsize=(20, 10))
+-plt.plot(np.arange(1, no_epochs+1), train_loss, label="Train loss")
+-plt.plot(np.arange(1, no_epochs+1), val_loss, label="Test loss")
+-plt.xlabel('Epochs')
+-plt.ylabel('Loss')
+-plt.title("Loss Plots")
+-plt.legend(loc='upper right')
+-plt.show()
+-
+-
+-
+-torch.save(model,'mlp.pt')
+\ No newline at end of file
+diff --git a/eICU-allcomers/mlp_influence.py b/eICU-allcomers/mlp_influence.py
+index 283631a..618dce2 100644
+--- a/eICU-allcomers/mlp_influence.py
++++ b/eICU-allcomers/mlp_influence.py
+@@ -17,7 +17,7 @@ from imblearn.over_sampling import SMOTE
+ class Model(torch.nn.Module):
+     def __init__(self):
+         super(Model, self).__init__()
+-        self.linear_1 = torch.nn.Linear(28, 100)
++        self.linear_1 = torch.nn.Linear(20, 100)
+         self.linear_2 = torch.nn.Linear(100,100)
+         self.linear_3 = torch.nn.Linear(100,2)
+         self.selu = torch.nn.SELU()
+@@ -68,11 +68,11 @@ scaler = StandardScaler()
+ x_train = scaler.fit_transform(x_train)
+ x_test = scaler.transform(x_test)
+ 
+-case_idx = np.where(y_test==1)[0]
+-x_test = x_test[case_idx]
+-y_test = y_test[case_idx]
++# case_idx = np.where(y_test==1)[0]
++# x_test = x_test[case_idx]
++# y_test = y_test[case_idx]
+     
+-# x_train, y_train = sm.fit_resample(x_train, y_train)
++x_train, y_train = sm.fit_resample(x_train, y_train)
+ 
+ x_train = torch.from_numpy(x_train).float().to(device)
+ x_test = torch.from_numpy(x_test).float().to(device)
+@@ -159,6 +159,8 @@ eqn_2 = np.array([])
+ eqn_5 = np.array([])
+ 
+ ihvp = ihvp.detach()
++print_iter = int(len(x_train)/100)
++print_cntr = 0
+ for i in range(len(x_train)):
+     x = x_train[i]
+     x.requires_grad = True
+@@ -175,9 +177,12 @@ for i in range(len(x_train)):
+     eqn_2 = np.vstack((eqn_2,-infl.detach().cpu().numpy())) if eqn_2.size else -infl.detach().cpu().numpy()
+     eqn_5 = np.vstack((eqn_5,-i_pert.detach().cpu().numpy())) if eqn_5.size else -i_pert.detach().cpu().numpy()
+     model.zero_grad()
++    if (i % print_iter ==0) or (i==len(x_train)-1):
++        print("Done "+str(print_cntr)+"/100")
++        print_cntr +=1
+     
+-np.save('results/eqn_2-test_set_cases-no_smote.npy',eqn_2)
+-np.save('results/eqn_5-test_set_cases-no_smote.npy',eqn_5)
++np.save('results/eqn_2-test_set_smote.npy',eqn_2)
++np.save('results/eqn_5-test_set_smote.npy',eqn_5)
+ 
+ elapsed_time = time.time()-start_time
+ # np.save('results/mlp_influence_time',elapsed_time)
+\ No newline at end of file
+diff --git a/eICU-allcomers/model_selection.py b/eICU-allcomers/model_selection.py
+index 5dbbd18..7f5a787 100644
+--- a/eICU-allcomers/model_selection.py
++++ b/eICU-allcomers/model_selection.py
+@@ -42,9 +42,9 @@ imputer = IterativeImputer()
+ x_imputed = imputer.fit_transform(x)
+ np.save('data/x_imputed.npy',x_imputed)
+ 
+-## Mutual Information Scores
+-# mi_score = mutual_info_classif(x_scaled,y)
+-# np.save('results/mi_scores.npy',mi_score)
++# Mutual Information Scores
++mi_score = mutual_info_classif(x_imputed,y)
++np.save('results/mi_scores.npy',mi_score)
+ 
+ ##Training Loop Starts
+ logReg_params = {'penalty':['l1','l2'],'C':[0.01,0.1,1,10,100],'solver':['liblinear'],'random_state':[r]}
+diff --git a/eICU-allcomers/results.py b/eICU-allcomers/results.py
+index a39a0aa..cd8f228 100644
+--- a/eICU-allcomers/results.py
++++ b/eICU-allcomers/results.py
+@@ -10,39 +10,42 @@ import pandas as pd
+ import save_plots
+ 
+ # noise = np.load('data/x_noise.pkl',allow_pickle=True)
+-probs = np.load('results/probs/smote/mlp_probs.npy')
++probs = np.load('results/probs/smote/mlp_probs.npy')[:,1]
+ test_labels = np.load('results/probs/smote/mlp_test_labels.npy')
+ 
+-save_plots.save_plots('MLP SMOTE',None,None,None,test_labels,probs[:,1])
++# save_plots.save_plots('Neural Network SMOTE',None,None,None,test_labels,probs[:,1])
+ 
+ # survey_results = pd.read_csv('results/survey_results.csv')
+ # feat_names = survey_results.columns.values
+ # survey_top_feats = np.flip(np.argsort(survey_results.values))
+ 
+ # column_names = np.load('data/column_names.npy',allow_pickle=True)
+-# coefs = np.load('results/coefs_smote.npy')
++# coefs = np.load('results/coefs_no_smote.npy')
+ # coefs = np.mean(coefs,axis=0)
+ # logreg_top_feats = np.flip(np.argsort(abs(coefs)))
+ 
+ # mi_score = np.load('results/mi_scores.npy')
+ # mi_top_feats = np.flip(np.argsort(mi_score))
+ 
+-# xgb_shap = np.load('results/xgb_shap_smote.npy')
++# xgb_shap = np.load('results/xgb_shap_no_smote.npy')
++# xgb_shap = np.sum(xgb_shap,axis=0)
+ # xgb_top_feats = np.flip(np.argsort(abs(xgb_shap)))
+ 
+ 
+-# mlp_shap = np.load('results/mlp_shap_values_smote.npy')
+-# sums = np.sum(np.sum((mlp_shap[0],mlp_shap[1]),axis=1),axis=0)
+-# mlp_shap_top_feats = np.flip(np.argsort(abs(sums)))
++# # mlp_shap = np.load('results/mlp_shap_values_smote.npy')
++# # sums = np.sum(np.sum((mlp_shap[0],mlp_shap[1]),axis=1),axis=0)
++# # mlp_shap_top_feats = np.flip(np.argsort(abs(sums)))
+ 
+-# eqn_2 = np.load('results/eqn_2-test_set.npy')
+-# eqn_5 = np.load('results/eqn_5-test_set_cases-no_smote.npy')
++# # eqn_2 = np.load('results/eqn_2-test_set.npy')
++# eqn_5 = np.load('results/eqn_5-test_set_smote.npy')
+ 
+ # infl_feat_importance = np.sum(eqn_5,axis=0)
+-# infl_top_feats = np.flip(np.argsort(abs(infl_feat_importance)))
+-
+-# for i in range(10):
+-#      print(column_names[mlp_shap_top_feats[i]])
+-
+-
+-# print(np.load('results/mlp_influence_time.npy')/60)
+\ No newline at end of file
++# infl_top_feats = np.flip(np.argsort((infl_feat_importance)))
++
++# for i in range(11):
++#       # print(feat_names[survey_top_feats[0,i]])
++#        print(column_names[mi_top_feats[i]])
++#        # print(column_names[logreg_top_feats[i]])
++#         # print(column_names[xgb_top_feats[i]])
++#       # print(column_names[mlp_shap_top_feats[i]])
++#        # print(column_names[infl_top_feats[i]])
+diff --git a/eICU-allcomers/results/probs/no_smote/xgb_probs.npy b/eICU-allcomers/results/probs/no_smote/xgb_probs.npy
+index 1b7ce3f..88b214f 100644
+Binary files a/eICU-allcomers/results/probs/no_smote/xgb_probs.npy and b/eICU-allcomers/results/probs/no_smote/xgb_probs.npy differ
+diff --git a/eICU-allcomers/results/probs/smote/xgb_probs.npy b/eICU-allcomers/results/probs/smote/xgb_probs.npy
+index 1b7ce3f..8ccdcb1 100644
+Binary files a/eICU-allcomers/results/probs/smote/xgb_probs.npy and b/eICU-allcomers/results/probs/smote/xgb_probs.npy differ
+diff --git a/eICU-allcomers/train_mlp.py b/eICU-allcomers/train_mlp.py
+index cc516a0..dc58e5a 100644
+--- a/eICU-allcomers/train_mlp.py
++++ b/eICU-allcomers/train_mlp.py
+@@ -12,25 +12,28 @@ from sklearn.model_selection import KFold
+ from imblearn.over_sampling import SMOTE
+ import matplotlib.pyplot as plt
+ from sklearn.preprocessing import StandardScaler
++from sklearn.metrics import roc_curve,auc, precision_recall_curve, average_precision_score
+ 
+ class Model(torch.nn.Module):
+-    def __init__(self):
++    def __init__(self, layer_1,layer_2,activation):
+         super(Model, self).__init__()
+-        self.linear_1 = torch.nn.Linear(20, 100)
+-        self.linear_2 = torch.nn.Linear(100,100)
+-        self.linear_3 = torch.nn.Linear(100,2)
++        self.linear_1 = torch.nn.Linear(20, layer_1)
++        self.linear_2 = torch.nn.Linear(layer_1,layer_2)
++        self.linear_3 = torch.nn.Linear(layer_2,2)
+         self.selu = torch.nn.SELU()
+         self.softmax = torch.nn.Softmax(dim=1)
++        self.activation = torch.nn.Sigmoid() if(activation == 0) else torch.nn.SELU()
+ 
+     def forward(self, x):
+         x = self.linear_1(x)
+-        x = self.selu(x)
++        x = self.activation(x)
+         x = self.linear_2(x)
+-        x = self.selu(x)
++        x = self.activation(x)
+         x = self.linear_3(x)
+         pred = self.softmax(x)
+-
+         return pred
++    
++r = np.random.RandomState(seed=1234567890)
+ 
+ x_imputed = np.load('data/x_imputed.npy')
+ y = np.load('data/y.npy')
+@@ -68,7 +71,9 @@ for train_index, test_index in kf.split(x_imputed,y):
+     train_loss = []
+     val_loss = []
+     
+-    model = Model()
++    model = Model(54,48,1)
++
++    
+     criterion = torch.nn.CrossEntropyLoss()
+     optimizer = torch.optim.SGD(model.parameters(), lr=0.5, momentum=0.9,weight_decay=0.01, nesterov=True)
+     
+@@ -119,16 +124,20 @@ for train_index, test_index in kf.split(x_imputed,y):
+     test_labels = np.hstack((test_labels,y_test)) if test_labels.size else y_test
+     test_data = np.vstack((test_data,x_test)) if test_data.size else x_test
+     
+-    fig=plt.figure(figsize=(20, 10))
+-    plt.plot(np.arange(1, no_epochs+1), train_loss, label="Train loss")
+-    plt.plot(np.arange(1, no_epochs+1), val_loss, label="Test loss")
+-    plt.xlabel('Epochs')
+-    plt.ylabel('Loss')
+-    plt.title("Loss Plots")
+-    plt.legend(loc='upper right')
+-    plt.show()
++    # fig=plt.figure(figsize=(20, 10))
++    # plt.plot(np.arange(1, no_epochs+1), train_loss, label="Train loss")
++    # plt.plot(np.arange(1, no_epochs+1), val_loss, label="Test loss")
++    # plt.xlabel('Epochs')
++    # plt.ylabel('Loss')
++    # plt.title("Loss Plots")
++    # plt.legend(loc='upper right')
++    # plt.show()
++
+ 
++fpr, tpr, thresholds = roc_curve(test_labels, mlp_probs[:,1], pos_label=1)
++roc_auc=auc(fpr,tpr)
++print(roc_auc)
+ 
+-np.save('results/probs/no_smote/mlp_probs.npy',mlp_probs)
+-np.save('results/probs/no_smote/mlp_test_labels.npy',test_labels)
++# np.save('results/probs/no_smote/mlp_probs.npy',mlp_probs)
++# np.save('results/probs/no_smote/mlp_test_labels.npy',test_labels)
+ # torch.save(model,'mlp.pt')
+\ No newline at end of file
+diff --git a/eICU-allcomers/xgboost_shap.py b/eICU-allcomers/xgboost_shap.py
+index 613aa25..b77570f 100644
+--- a/eICU-allcomers/xgboost_shap.py
++++ b/eICU-allcomers/xgboost_shap.py
+@@ -10,12 +10,16 @@ import numpy as np
+ import xgboost
+ import shap
+ from imblearn.over_sampling import SMOTE
++from sklearn.preprocessing import StandardScaler
+ 
+ r = np.random.RandomState(seed=1234567890)
+ 
+-x_scaled = np.load('data/x_scaled.npy')
++x_imputed = np.load('data/x_imputed.npy')
+ y = np.load('data/y.npy')
+ 
++scaler = StandardScaler()
++x_scaled =  scaler.fit_transform(x_imputed)
++
+ sm = SMOTE()
+ 
+ x_resampled, y_resampled = sm.fit_resample(x_scaled,y)
+@@ -24,7 +28,7 @@ x_resampled, y_resampled = sm.fit_resample(x_scaled,y)
+ feat_names = np.load('data/column_names.npy',allow_pickle=True)
+ 
+ model = xgboost.train({"gamma":0,"learning_rate": 0.01,"max_depth":2,"min_child_weight":0.1,
+-                       "n_estimators":50,"random_state":2}, xgboost.DMatrix(x_scaled, label=y), 100)
++                       "n_estimators":50,"random_state":2}, xgboost.DMatrix(x_resampled, label=y_resampled), 100)
+ 
+ # explain the model's predictions using SHAP
+ # (same syntax works for LightGBM, CatBoost, scikit-learn and spark models)
+diff --git a/eICU-septic/compiled_results.csv b/eICU-septic/compiled_results.csv
+deleted file mode 100644
+index d629912..0000000
+--- a/eICU-septic/compiled_results.csv
++++ /dev/null
+@@ -1,38 +0,0 @@
+-﻿Model Selection,No SMOTE,SMOTE,,,,,,,,,,
+-Model Type,ROC AUC,,,,,,,,,,,
+-Logistic Regression,0.8,0.8,,,,,,,,,,
+-XGBoost,0.69,0.72,,(optimal parameters available for all model types),,,,,,,,
+-MLP,0.74,0.71,,,,,,,,,,
+-,,,,,,,,,,,,
+-,,,,,,,,,,,,
+-,Top 10 Feats,,,,,,,,,,,
+-Feature Importance Metrics,1,2,3,4,5,6,7,8,9,10,,
+-Clinician Survey,hepaticfailure,LACTATE_max,age,immunosuppression,metastaticcancer,CREATININE,p/f,INR,GCS-motor,BILIRUBIN,,n = 41
+-Mutual Information,LACTATE_max,PT_max,INR_max,BICARBONATE_min,ANIONGAP_max,day1motor,BUN_max,BILIRUBIN_max,ALBUMIN_min,CREATININE_max,,
+-Logistic Regression Coefficients (no SMOTE),CHLORIDE_max,BICARBONATE_min,LACTATE_max,ALBUMIN_min,SODIUM_max,day1motor,age,ANIONGAP_max,BUN_max,SODIUM_min,,
+-Logistic Regression Coefficients (SMOTE),CHLORIDE_max,BICARBONATE_min,LACTATE_max,ALBUMIN_min,SODIUM_max,ANIONGAP_max,age,day1motor,SODIUM_min,BUN_max,,
+-XGBoost Shap (no SMOTE),PT_max,LACTATE_max,BICARBONATE_min,BUN_max,INR_max,PLATELET_min,ALBUMIN_min,day1motor,HEMATOCRIT_min,GLUCOSE_min,,
+-XGBoost Shap SMOTE,LACTATE_max,BICARBONATE_min,day1motor,BUN_max,INR_max,ALBUMIN_min,age,BILIRUBIN_max,patientunitstayid,aids,,
+-MLP Shap via DeepLIFT (no SMOTE),gender,day1motor,age,BILIRUBIN_max,diabetes,patientunitstayid,BICARBONATE_min,hepaticfailure,SODIUM_min,SODIUM_max,,
+-MLP Shap via DeepLIFT (SMOTE),,SODIUM_max,BICARBONATE_min,diabetes,WBC_max,SODIUM_min,ANIONGAP_max,day1motor,ALBUMIN_min,BUN_max,CHLORIDE_max,
+-MLP Influence Functions (no SMOTE),ALBUMIN_min,LACTATE_max,aids,BICARBONATE_min,PT_max,age,ANIONGAP_max,BILIRUBIN_max,CHLORIDE_min,metastaticcancer,,
+-MLP Influence Functions (SMOTE),CHLORIDE_max,LACTATE_max,INR_max,BICARBONATE_min,PT_max,SODIUM_max,day1motor,BUN_max,hepaticfailure,diabetes,,
+-,,,,,,,,,,,,
+-Algorithm Computation Time,Time (minutes),,,,,,,,,,,
+-Shap via DeepLIFT,226.6935768,,,,,,,,,,,
+-Influence Extended,1.420261268,,,,,,,,,,,
+-,,,,,,,,,,,,
+-Common Features with Survey (BEST MODEL),Count,,,,,,,,,,,
+-Mutual Information,4,,,,,,,,,,,
+-Logistic Regression Coefficients,2,,,,,,,,,,,
+-XGBoost Shap,4,but found misc feat,,Test size = 0.1,Test size = 0.2,Test size = 0.33,Test size = 0.5,,,,,
+-MLP Shap via DeepLIFT,3,but found misc feat,,BICARBONATE_min,BICARBONATE_min,age,BICARBONATE_min,,,,,
+-MLP Influence Functions,4,,,ANIONGAP_max,LACTATE_max,LACTATE_max,LACTATE_max,,,,,
+-,,,,LACTATE_max,ANIONGAP_max,BICARBONATE_min,ALBUMIN_min,,,,,
+-,,,,CHLORIDE_max,ALBUMIN_min,ALBUMIN_min,PLATELET_min,,,,,
+-,,,,ALBUMIN_min,age,GLUCOSE_min,ANIONGAP_max,,,,,
+-,,,,PT_max,CHLORIDE_max,day1motor,age,,,,,
+-,,,,age,PT_max,CHLORIDE_max,GLUCOSE_min,,,,,
+-,,,,HEMATOCRIT_min,INR_max,ANIONGAP_max,diabetes,,,,,
+-,,,,day1motor,diabetes,CREATININE_max,SODIUM_min,,,,,
+-,,,,SODIUM_max,HEMATOCRIT_min,diabetes,aids,,,,,
+diff --git a/eICU-septic/results.py b/eICU-septic/results.py
+index 5560dbb..43ff5b0 100644
+--- a/eICU-septic/results.py
++++ b/eICU-septic/results.py
+@@ -15,9 +15,9 @@ import save_plots
+ 
+ # save_plots.save_plots('XGBoost SMOTE',None,None,None,test_labels,probs[:,1])
+ 
+-# survey_results = pd.read_csv('results/survey_results.csv')
+-# feat_names = survey_results.columns.values
+-# survey_top_feats = np.flip(np.argsort(survey_results.values))
++survey_results = pd.read_csv('results/survey_results.csv')
++feat_names = survey_results.columns.values
++survey_top_feats = np.flip(np.argsort(survey_results.values))
+ 
+ column_names = np.load('data/column_names.npy',allow_pickle=True)
+ # coefs = np.load('results/coefs_smote.npy')
+@@ -36,13 +36,13 @@ sums = np.sum(np.sum((mlp_shap[0],mlp_shap[1]),axis=1),axis=0)
+ mlp_shap_top_feats = np.flip(np.argsort(abs(sums)))
+ 
+ # eqn_2 = np.load('results/eqn_2-test_set.npy')
+-eqn_5 = np.load('results/eqn_5-test_set_cases-no_smote.npy')
++eqn_5 = np.load('results/eqn_5-test_set-no_smote.npy')
+ 
+ infl_feat_importance = np.sum(eqn_5,axis=0)
+ infl_top_feats = np.flip(np.argsort(abs(infl_feat_importance)))
+ 
+-for i in range(10):
+-     print(column_names[mlp_shap_top_feats[i]])
++for i in range(11):
++     print(feat_names[survey_top_feats[0,i]])
+ 
+ 
+ # print(np.load('results/mlp_influence_time.npy')/60)
+\ No newline at end of file
+diff --git a/eICU-septic/results/survey_results.csv b/eICU-septic/results/survey_results.csv
+deleted file mode 100644
+index f6fbaa9..0000000
+--- a/eICU-septic/results/survey_results.csv
++++ /dev/null
+@@ -1,2 +0,0 @@
+-﻿ALBUMIN,BILIRUBIN,CHLORIDE,CREATININE,GCS-eye,GCS-motor,GCS-verbal,GLUCOSE,HEMATOCRIT,INR,LACTATE_max,PLATELET,PT,PTT,Potassium,SODIUM,WBC,age,aids,diabetes,hepaticfailure,immunosuppression,leukemia,lymphoma,metastaticcancer,p/f
+-12,15,0,31,8,17,10,4,7,19,37,15,1,0,3,12,11,36,10,8,37,34,15,11,31,26

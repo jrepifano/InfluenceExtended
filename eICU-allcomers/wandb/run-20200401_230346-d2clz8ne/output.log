@@ -1,0 +1,5 @@
+Using device: TITAN V
+Traceback (most recent call last):
+  File "train_mlp_wandb.py", line 68, in <module>
+    x_test = scaler.transform(x_imputed[test_index])
+NameError: name 'test_index' is not defined

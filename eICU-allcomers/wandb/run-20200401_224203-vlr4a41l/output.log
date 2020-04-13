@@ -1,0 +1,40 @@
+Using device: TITAN V
+Moved to GPU
+
+Epoch: 1/200, Train Loss: 0.67443061, Test Loss: 0.48464203
+
+Epoch: 101/200, Train Loss: 0.36782828, Test Loss: 0.37801155
+
+Epoch: 200/200, Train Loss: 0.36780140, Test Loss: 0.37796575
+Moved to GPU
+
+Epoch: 1/200, Train Loss: 0.60687530, Test Loss: 0.45215124
+
+Epoch: 101/200, Train Loss: 0.37042680, Test Loss: 0.36899984
+
+Epoch: 200/200, Train Loss: 0.37038663, Test Loss: 0.36897090
+Moved to GPU
+
+Epoch: 1/200, Train Loss: 0.72201490, Test Loss: 0.50865853
+
+Epoch: 101/200, Train Loss: 0.37034792, Test Loss: 0.37075639
+
+Epoch: 200/200, Train Loss: 0.37000862, Test Loss: 0.37044400
+Moved to GPU
+
+Epoch: 1/200, Train Loss: 0.57438308, Test Loss: 0.42004836
+
+Epoch: 101/200, Train Loss: 0.37049857, Test Loss: 0.36895767
+
+Epoch: 200/200, Train Loss: 0.37047797, Test Loss: 0.36895880
+Moved to GPU
+
+Epoch: 1/200, Train Loss: 0.63377512, Test Loss: 0.43824652
+
+Epoch: 101/200, Train Loss: 0.37160125, Test Loss: 0.36440039
+
+Epoch: 200/200, Train Loss: 0.37147835, Test Loss: 0.36425030
+Traceback (most recent call last):
+  File "train_mlp.py", line 154, in <module>
+    wandb.log({'roc_auc':roc_auc})
+NameError: name 'roc_auc' is not defined

@@ -1,0 +1,26 @@
+{
+    "root": "E:/Documents/GitHub/InfluenceExtended",
+    "program": "C:\\Users\\Jake\\Anaconda3\\envs\\PhD\\Scripts\\wandb.exe\\__main__.py",
+    "git": {
+        "remote": "https://github.com/jrepifano/InfluenceExtended.git",
+        "commit": "c42c04fdab442d6261a02dded03f1064f1fb5f24"
+    },
+    "email": "jrepifano@gmail.com",
+    "startedAt": "2020-04-02T00:16:58.918787",
+    "host": "DESKTOP-885ROAG",
+    "username": "Jake",
+    "executable": "c:\\users\\jake\\anaconda3\\envs\\phd\\python.exe",
+    "os": "Windows-10-10.0.18362-SP0",
+    "python": "3.6.8",
+    "cpu_count": 8,
+    "args": [
+        "agent",
+        "jrepifano/InfluenceExtended/74mvau85"
+    ],
+    "state": "finished",
+    "jobType": null,
+    "mode": "run",
+    "project": "InfluenceExtended",
+    "heartbeatAt": "2020-04-02T00:18:23.024660",
+    "exitcode": 0
+}

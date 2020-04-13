@@ -1,0 +1,23 @@
+{
+    "root": "E:/Documents/GitHub/InfluenceExtended",
+    "program": "E:\\Documents\\GitHub\\InfluenceExtended\\eICU-allcomers\\train_mlp_wandb_cv.py",
+    "git": {
+        "remote": "https://github.com/jrepifano/InfluenceExtended.git",
+        "commit": "c42c04fdab442d6261a02dded03f1064f1fb5f24"
+    },
+    "email": "jrepifano@gmail.com",
+    "startedAt": "2020-04-02T19:24:58.925114",
+    "host": "DESKTOP-885ROAG",
+    "username": "Jake",
+    "executable": "C:\\Users\\Jake\\Anaconda3\\envs\\PhD\\pythonw.exe",
+    "os": "Windows-10-10.0.18362-SP0",
+    "python": "3.6.8",
+    "cpu_count": 8,
+    "args": [],
+    "state": "running",
+    "jobType": null,
+    "mode": "run",
+    "name": "fresh-valley-114",
+    "project": "InfluenceExtended",
+    "heartbeatAt": "2020-04-02T19:41:01.435949"
+}

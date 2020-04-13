@@ -1,0 +1,117 @@
+Using device: TITAN V
+Moved to GPU
+
+Epoch: 1/1000, Train Loss: 0.91220629, Test Loss: 0.37939188
+
+Epoch: 101/1000, Train Loss: 0.37071988, Test Loss: 0.38049886
+
+Epoch: 201/1000, Train Loss: 0.37075436, Test Loss: 0.38054475
+
+Epoch: 301/1000, Train Loss: 0.37075436, Test Loss: 0.38054475
+
+Epoch: 401/1000, Train Loss: 0.37075436, Test Loss: 0.38054475
+
+Epoch: 501/1000, Train Loss: 0.37075436, Test Loss: 0.38054475
+
+Epoch: 601/1000, Train Loss: 0.37075436, Test Loss: 0.38054475
+
+Epoch: 701/1000, Train Loss: 0.37075436, Test Loss: 0.38054475
+
+Epoch: 801/1000, Train Loss: 0.37075436, Test Loss: 0.38054475
+
+Epoch: 901/1000, Train Loss: 0.37075436, Test Loss: 0.38054475
+
+Epoch: 1000/1000, Train Loss: 0.37075436, Test Loss: 0.38054475
+Moved to GPU
+
+Epoch: 1/1000, Train Loss: 0.86037076, Test Loss: 0.37089002
+
+Epoch: 101/1000, Train Loss: 0.37281707, Test Loss: 0.37214732
+
+Epoch: 201/1000, Train Loss: 0.37287462, Test Loss: 0.37219548
+
+Epoch: 301/1000, Train Loss: 0.37287462, Test Loss: 0.37219548
+
+Epoch: 401/1000, Train Loss: 0.37287462, Test Loss: 0.37219548
+
+Epoch: 501/1000, Train Loss: 0.37287462, Test Loss: 0.37219548
+
+Epoch: 601/1000, Train Loss: 0.37287462, Test Loss: 0.37219548
+
+Epoch: 701/1000, Train Loss: 0.37287462, Test Loss: 0.37219548
+
+Epoch: 801/1000, Train Loss: 0.37287462, Test Loss: 0.37219548
+
+Epoch: 901/1000, Train Loss: 0.37287462, Test Loss: 0.37219548
+
+Epoch: 1000/1000, Train Loss: 0.37287462, Test Loss: 0.37219548
+Moved to GPU
+
+Epoch: 1/1000, Train Loss: 0.64037985, Test Loss: 0.37230280
+
+Epoch: 101/1000, Train Loss: 0.37249303, Test Loss: 0.37341473
+
+Epoch: 201/1000, Train Loss: 0.37255654, Test Loss: 0.37346256
+
+Epoch: 301/1000, Train Loss: 0.37255654, Test Loss: 0.37346256
+
+Epoch: 401/1000, Train Loss: 0.37255654, Test Loss: 0.37346256
+
+Epoch: 501/1000, Train Loss: 0.37255654, Test Loss: 0.37346256
+
+Epoch: 601/1000, Train Loss: 0.37255654, Test Loss: 0.37346256
+
+Epoch: 701/1000, Train Loss: 0.37255654, Test Loss: 0.37346256
+
+Epoch: 801/1000, Train Loss: 0.37255654, Test Loss: 0.37346256
+
+Epoch: 901/1000, Train Loss: 0.37255654, Test Loss: 0.37346256
+
+Epoch: 1000/1000, Train Loss: 0.37255654, Test Loss: 0.37346256
+Moved to GPU
+
+Epoch: 1/1000, Train Loss: 0.83224386, Test Loss: 0.37067637
+
+Epoch: 101/1000, Train Loss: 0.37286663, Test Loss: 0.37194911
+
+Epoch: 201/1000, Train Loss: 0.37292439, Test Loss: 0.37199721
+
+Epoch: 301/1000, Train Loss: 0.37292439, Test Loss: 0.37199721
+
+Epoch: 401/1000, Train Loss: 0.37292439, Test Loss: 0.37199721
+
+Epoch: 501/1000, Train Loss: 0.37292439, Test Loss: 0.37199721
+
+Epoch: 601/1000, Train Loss: 0.37292439, Test Loss: 0.37199721
+
+Epoch: 701/1000, Train Loss: 0.37292439, Test Loss: 0.37199721
+
+Epoch: 801/1000, Train Loss: 0.37292439, Test Loss: 0.37199721
+
+Epoch: 901/1000, Train Loss: 0.37292439, Test Loss: 0.37199721
+
+Epoch: 1000/1000, Train Loss: 0.37292439, Test Loss: 0.37199721
+Moved to GPU
+
+Epoch: 1/1000, Train Loss: 0.82449591, Test Loss: 0.36410144
+
+Epoch: 101/1000, Train Loss: 0.37452605, Test Loss: 0.36540556
+
+Epoch: 201/1000, Train Loss: 0.37456641, Test Loss: 0.36545533
+
+Epoch: 301/1000, Train Loss: 0.37456641, Test Loss: 0.36545530
+
+Epoch: 401/1000, Train Loss: 0.37456641, Test Loss: 0.36545530
+
+Epoch: 501/1000, Train Loss: 0.37456641, Test Loss: 0.36545530
+
+Epoch: 601/1000, Train Loss: 0.37456641, Test Loss: 0.36545530
+
+Epoch: 701/1000, Train Loss: 0.37456641, Test Loss: 0.36545530
+
+Epoch: 801/1000, Train Loss: 0.37456641, Test Loss: 0.36545530
+
+Epoch: 901/1000, Train Loss: 0.37456641, Test Loss: 0.36545530
+
+Epoch: 1000/1000, Train Loss: 0.37456641, Test Loss: 0.36545530
+0.5397828401632905

@@ -1,0 +1,16 @@
+Using device: TITAN V
+Moved to GPU
+
+Epoch: 1/200, Train Loss: 0.69880867, Test Loss: 0.79449242
+
+Epoch: 51/200, Train Loss: 0.69484401, Test Loss: 0.74981511
+
+Epoch: 101/200, Train Loss: 0.69323742, Test Loss: 0.72051889
+
+Epoch: 151/200, Train Loss: 0.69275075, Test Loss: 0.70638788
+
+Epoch: 200/200, Train Loss: 0.69254035, Test Loss: 0.69973725
+Traceback (most recent call last):
+  File "train_mlp_wandb.py", line 139, in <module>
+    wandb.log({'roc_auc':roc_auc})
+NameError: name 'roc_auc' is not defined

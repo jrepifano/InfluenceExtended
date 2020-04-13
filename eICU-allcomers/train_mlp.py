@@ -12,13 +12,14 @@ from sklearn.model_selection import KFold
 from imblearn.over_sampling import SMOTE
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import roc_curve,auc, precision_recall_curve, average_precision_score
 
 class Model(torch.nn.Module):
     def __init__(self):
         super(Model, self).__init__()
-        self.linear_1 = torch.nn.Linear(20, 100)
-        self.linear_2 = torch.nn.Linear(100,100)
-        self.linear_3 = torch.nn.Linear(100,2)
+        self.linear_1 = torch.nn.Linear(20, 12)
+        self.linear_2 = torch.nn.Linear(12,188)
+        self.linear_3 = torch.nn.Linear(188,2)
         self.selu = torch.nn.SELU()
         self.softmax = torch.nn.Softmax(dim=1)
 
@@ -29,8 +30,9 @@ class Model(torch.nn.Module):
         x = self.selu(x)
         x = self.linear_3(x)
         pred = self.softmax(x)
-
         return pred
+    
+r = np.random.RandomState(seed=1234567890)
 
 x_imputed = np.load('data/x_imputed.npy')
 y = np.load('data/y.npy')
@@ -43,9 +45,9 @@ mlp_probs = np.array([])
 test_labels = np.array([])
 test_data = np.array([])
 
-no_epochs = 1000
+no_epochs = 503
 
-kf = KFold(n_splits=5)
+kf = KFold(n_splits=5, shuffle=True, random_state=r)
 
 print_iter = 100
 
@@ -69,8 +71,10 @@ for train_index, test_index in kf.split(x_imputed,y):
     val_loss = []
     
     model = Model()
+
+    
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.5, momentum=0.9,weight_decay=0.01, nesterov=True)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.5828, momentum=0.8222,weight_decay=0.001757, nesterov=True)
     
     if device:
         model.to(device)
@@ -119,16 +123,20 @@ for train_index, test_index in kf.split(x_imputed,y):
     test_labels = np.hstack((test_labels,y_test)) if test_labels.size else y_test
     test_data = np.vstack((test_data,x_test)) if test_data.size else x_test
     
-    fig=plt.figure(figsize=(20, 10))
-    plt.plot(np.arange(1, no_epochs+1), train_loss, label="Train loss")
-    plt.plot(np.arange(1, no_epochs+1), val_loss, label="Test loss")
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.title("Loss Plots")
-    plt.legend(loc='upper right')
-    plt.show()
+    # fig=plt.figure(figsize=(20, 10))
+    # plt.plot(np.arange(1, no_epochs+1), train_loss, label="Train loss")
+    # plt.plot(np.arange(1, no_epochs+1), val_loss, label="Test loss")
+    # plt.xlabel('Epochs')
+    # plt.ylabel('Loss')
+    # plt.title("Loss Plots")
+    # plt.legend(loc='upper right')
+    # plt.show()
 
+
+fpr, tpr, thresholds = roc_curve(test_labels, mlp_probs[:,1], pos_label=1)
+roc_auc=auc(fpr,tpr)
+print(roc_auc)
 
 np.save('results/probs/no_smote/mlp_probs.npy',mlp_probs)
 np.save('results/probs/no_smote/mlp_test_labels.npy',test_labels)
-# torch.save(model,'mlp.pt')
+torch.save(model,'mlp.pt')

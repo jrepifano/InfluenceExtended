@@ -17,7 +17,7 @@ from imblearn.over_sampling import SMOTE
 class Model(torch.nn.Module):
     def __init__(self):
         super(Model, self).__init__()
-        self.linear_1 = torch.nn.Linear(28, 100)
+        self.linear_1 = torch.nn.Linear(20, 100)
         self.linear_2 = torch.nn.Linear(100,100)
         self.linear_3 = torch.nn.Linear(100,2)
         self.selu = torch.nn.SELU()
@@ -68,11 +68,11 @@ scaler = StandardScaler()
 x_train = scaler.fit_transform(x_train)
 x_test = scaler.transform(x_test)
 
-case_idx = np.where(y_test==1)[0]
-x_test = x_test[case_idx]
-y_test = y_test[case_idx]
+# case_idx = np.where(y_test==1)[0]
+# x_test = x_test[case_idx]
+# y_test = y_test[case_idx]
     
-# x_train, y_train = sm.fit_resample(x_train, y_train)
+x_train, y_train = sm.fit_resample(x_train, y_train)
 
 x_train = torch.from_numpy(x_train).float().to(device)
 x_test = torch.from_numpy(x_test).float().to(device)
@@ -159,6 +159,8 @@ eqn_2 = np.array([])
 eqn_5 = np.array([])
 
 ihvp = ihvp.detach()
+print_iter = int(len(x_train)/100)
+print_cntr = 0
 for i in range(len(x_train)):
     x = x_train[i]
     x.requires_grad = True
@@ -175,9 +177,12 @@ for i in range(len(x_train)):
     eqn_2 = np.vstack((eqn_2,-infl.detach().cpu().numpy())) if eqn_2.size else -infl.detach().cpu().numpy()
     eqn_5 = np.vstack((eqn_5,-i_pert.detach().cpu().numpy())) if eqn_5.size else -i_pert.detach().cpu().numpy()
     model.zero_grad()
+    if (i % print_iter ==0) or (i==len(x_train)-1):
+        print("Done "+str(print_cntr)+"/100")
+        print_cntr +=1
     
-np.save('results/eqn_2-test_set_cases-no_smote.npy',eqn_2)
-np.save('results/eqn_5-test_set_cases-no_smote.npy',eqn_5)
+np.save('results/eqn_2-test_set_smote.npy',eqn_2)
+np.save('results/eqn_5-test_set_smote.npy',eqn_5)
 
 elapsed_time = time.time()-start_time
 # np.save('results/mlp_influence_time',elapsed_time)

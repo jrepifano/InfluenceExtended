@@ -1,0 +1,16 @@
+Using device: TITAN V
+Moved to GPU
+
+Epoch: 1/200, Train Loss: 0.69420230, Test Loss: 0.65150368
+
+Epoch: 51/200, Train Loss: 0.68915415, Test Loss: 0.68834680
+
+Epoch: 101/200, Train Loss: 0.68605554, Test Loss: 0.68505734
+
+Epoch: 151/200, Train Loss: 0.68100709, Test Loss: 0.67975134
+
+Epoch: 200/200, Train Loss: 0.67023563, Test Loss: 0.66776019
+Traceback (most recent call last):
+  File "train_mlp_wandb.py", line 130, in <module>
+    mlp_probs = np.vstack((mlp_probs,pred_test.detach().cpu().numpy())) if mlp_probs.size else pred_test.detach().cpu().numpy()
+NameError: name 'mlp_probs' is not defined

@@ -1,0 +1,12 @@
+usage: train_mlp.py [-h] --layer_1_in LAYER_1_IN --mask_wandb MASK_WANDB
+                    [--feature_dim FEATURE_DIM] [--base_lr BASE_LR]
+                    [--learning-anneal LEARNING_ANNEAL] [--lr_bump LR_BUMP]
+                    [--lr_bump_patience LR_BUMP_PATIENCE] [--epochs EPOCHS]
+                    [--batch_size BATCH_SIZE] [--repeat_sample REPEAT_SAMPLE]
+                    [--num_workers NUM_WORKERS]
+                    [--continue-from CONTINUE_FROM]
+                    [--final_kernel_size FINAL_KERNEL_SIZE]
+                    [--kernel_size KERNEL_SIZE]
+                    [--kernel_size_step KERNEL_SIZE_STEP] [--verbose VERBOSE]
+                    [--seed SEED]
+train_mlp.py: error: the following arguments are required: --mask_wandb

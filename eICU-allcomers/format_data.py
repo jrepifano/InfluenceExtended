@@ -13,29 +13,29 @@ df = pd.read_csv('data/nopf.csv')
 data = df.iloc[:,2:-1]
 labels = df.iloc[:,-1]
 
-# counter = np.zeros((data.shape[1]))
-# for i in range(len(data)):
-#     for j in range(data.shape[1]):
-#         if(data.iloc[i,j]<0 or pd.isnull(data.iloc[i,j])):
-#             counter[j]+=1
+counter = np.zeros((data.shape[1]))
+for i in range(len(data)):
+    for j in range(data.shape[1]):
+        if(data.iloc[i,j]<0 or pd.isnull(data.iloc[i,j])):
+            counter[j]+=1
             
-# normalized_counter = counter/len(data)
+normalized_counter = counter/len(data)
 
-# col_to_drop = np.where(normalized_counter>0.5)[0]
-# 
-# print('Dropping Features with more than 50% missing: '+str(data.columns[col_to_drop]))
+col_to_drop = np.where(normalized_counter>0.5)[0]
 
-# data = data.drop(data.columns[col_to_drop],axis=1)
+print('Dropping Features with more than 50% missing: '+str(data.columns[col_to_drop]))
 
-y = []
-for i in range(len(labels)):
-    if labels[i] == 'ALIVE':
-        y.append(0)
-    else:
-        y.append(1)
+data = data.drop(data.columns[col_to_drop],axis=1)
+
+# y = []
+# for i in range(len(labels)):
+#     if labels[i] == 'ALIVE':
+#         y.append(0)
+#     else:
+#         y.append(1)
         
-y = np.asarray(y)
+# y = np.asarray(y)
 
-np.save('data/column_names.npy',data.columns.values,allow_pickle=True)
-np.save('data/x.npy',data.values)
-np.save('data/y.npy',y)
+# np.save('data/column_names.npy',data.columns.values,allow_pickle=True)
+# np.save('data/x.npy',data.values)
+# np.save('data/y.npy',y)

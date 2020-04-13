@@ -1,0 +1,18 @@
+Using device: TITAN V
+Moved to GPU
+Traceback (most recent call last):
+  File "train_mlp_wandb.py", line 103, in <module>
+    pred = model(image)
+  File "c:\users\jake\anaconda3\envs\phd\lib\site-packages\torch\nn\modules\module.py", line 493, in __call__
+    result = self.forward(*input, **kwargs)
+  File "train_mlp_wandb.py", line 45, in forward
+    x = self.linear_2(x)
+  File "c:\users\jake\anaconda3\envs\phd\lib\site-packages\torch\nn\modules\module.py", line 493, in __call__
+    result = self.forward(*input, **kwargs)
+  File "c:\users\jake\anaconda3\envs\phd\lib\site-packages\torch\nn\modules\linear.py", line 92, in forward
+    return F.linear(input, self.weight, self.bias)
+  File "c:\users\jake\anaconda3\envs\phd\lib\site-packages\torch\nn\functional.py", line 1404, in linear
+    if input.dim() == 2 and bias is not None:
+  File "c:\users\jake\anaconda3\envs\phd\lib\site-packages\torch\nn\modules\module.py", line 539, in __getattr__
+    type(self).__name__, name))
+AttributeError: 'SELU' object has no attribute 'dim'

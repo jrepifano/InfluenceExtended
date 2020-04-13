@@ -42,9 +42,9 @@ imputer = IterativeImputer()
 x_imputed = imputer.fit_transform(x)
 np.save('data/x_imputed.npy',x_imputed)
 
-## Mutual Information Scores
-# mi_score = mutual_info_classif(x_scaled,y)
-# np.save('results/mi_scores.npy',mi_score)
+# Mutual Information Scores
+mi_score = mutual_info_classif(x_imputed,y)
+np.save('results/mi_scores.npy',mi_score)
 
 ##Training Loop Starts
 logReg_params = {'penalty':['l1','l2'],'C':[0.01,0.1,1,10,100],'solver':['liblinear'],'random_state':[r]}

@@ -1,0 +1,9 @@
+Using device: TITAN V
+c:\users\jake\anaconda3\envs\phd\lib\site-packages\sklearn\model_selection\_split.py:296: FutureWarning: Setting a random_state has no effect since shuffle is False. This will raise an error in 0.24. You should leave random_state to its default (None), or set shuffle=True.
+  FutureWarning
+Traceback (most recent call last):
+  File "train_mlp_wandb_cv.py", line 97, in <module>
+    model = Model(layer_1=cmd_args.layer_1,layer_2=cmd_args.layer_2)
+  File "train_mlp_wandb_cv.py", line 43, in __init__
+    self.activation = torch.nn.Sigmoid() if(activation == 0) else torch.nn.SELU()
+NameError: name 'activation' is not defined
