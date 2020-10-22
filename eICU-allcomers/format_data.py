@@ -9,23 +9,23 @@ import pandas as pd
 import numpy as np
 
 df = pd.read_csv('data/nopf.csv')
+counts = df['admitdiagnosis'].value_counts()
+# data = df.iloc[:,2:-1]
+# labels = df.iloc[:,-1]
 
-data = df.iloc[:,2:-1]
-labels = df.iloc[:,-1]
-
-counter = np.zeros((data.shape[1]))
-for i in range(len(data)):
-    for j in range(data.shape[1]):
-        if(data.iloc[i,j]<0 or pd.isnull(data.iloc[i,j])):
-            counter[j]+=1
+# counter = np.zeros((data.shape[1]))
+# for i in range(len(data)):
+#     for j in range(data.shape[1]):
+#         if(data.iloc[i,j]<0 or pd.isnull(data.iloc[i,j])):
+#             counter[j]+=1
             
-normalized_counter = counter/len(data)
+# normalized_counter = counter/len(data)
 
-col_to_drop = np.where(normalized_counter>0.5)[0]
+# col_to_drop = np.where(normalized_counter>0.5)[0]
 
-print('Dropping Features with more than 50% missing: '+str(data.columns[col_to_drop]))
+# print('Dropping Features with more than 50% missing: '+str(data.columns[col_to_drop]))
 
-data = data.drop(data.columns[col_to_drop],axis=1)
+# data = data.drop(data.columns[col_to_drop],axis=1)
 
 # y = []
 # for i in range(len(labels)):

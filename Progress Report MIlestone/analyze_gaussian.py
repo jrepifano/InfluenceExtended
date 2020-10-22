@@ -27,6 +27,9 @@ plt.scatter(x1[:,0],x1[:,1],label='Class 0')
 plt.scatter(x2[:,0],x2[:,1],label='Class 1')
 plt.scatter(x_test[:,0],x_test[:,1],label='Center Distribution Points')
 plt.legend(loc='lower right',prop={'size':8})
+plt.title('Synthetic Gaussian Dataset')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
 plt.show()
 
 most_infl_0 = np.argsort(eqn_2[:,0])[::-1][:10]

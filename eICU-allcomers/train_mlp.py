@@ -60,7 +60,7 @@ for train_index, test_index in kf.split(x_imputed,y):
     x_test = scaler.transform(x_imputed[test_index])
     y_test = y[test_index]
     
-    # x_train,y_train = SMOTE().fit_resample(x_train,y_train)
+    x_train,y_train = SMOTE().fit_resample(x_train,y_train)
     
     x_train = torch.from_numpy(x_train)
     x_test = torch.from_numpy(x_test)
@@ -137,6 +137,6 @@ fpr, tpr, thresholds = roc_curve(test_labels, mlp_probs[:,1], pos_label=1)
 roc_auc=auc(fpr,tpr)
 print(roc_auc)
 
-np.save('results/probs/no_smote/mlp_probs.npy',mlp_probs)
-np.save('results/probs/no_smote/mlp_test_labels.npy',test_labels)
-torch.save(model,'mlp.pt')
+# np.save('results/probs/no_smote/mlp_probs.npy',mlp_probs)
+# np.save('results/probs/no_smote/mlp_test_labels.npy',test_labels)
+torch.save(model.state_dict(),'mlp.pt')

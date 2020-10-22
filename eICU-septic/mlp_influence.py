@@ -17,9 +17,9 @@ from imblearn.over_sampling import SMOTE
 class Model(torch.nn.Module):
     def __init__(self):
         super(Model, self).__init__()
-        self.linear_1 = torch.nn.Linear(28, 100)
-        self.linear_2 = torch.nn.Linear(100,100)
-        self.linear_3 = torch.nn.Linear(100,2)
+        self.linear_1 = torch.nn.Linear(28, 184)
+        self.linear_2 = torch.nn.Linear(184,192)
+        self.linear_3 = torch.nn.Linear(192,2)
         self.selu = torch.nn.SELU()
         self.softmax = torch.nn.Softmax(dim=1)
 
@@ -30,7 +30,6 @@ class Model(torch.nn.Module):
         x = self.selu(x)
         x = self.linear_3(x)
         pred = self.softmax(x)
-
         return pred
     
 def hessian_vector_product(ys,xs,v):
@@ -55,7 +54,7 @@ mlp_probs = np.array([])
 test_labels = np.array([])
 test_data = np.array([])
 
-no_epochs = 2000
+no_epochs = 4000
 train_loss = list()
 val_loss = list()
 best_val_loss = 1
@@ -72,7 +71,7 @@ case_idx = np.where(y_test==1)[0]
 x_test = x_test[case_idx]
 y_test = y_test[case_idx]
     
-# x_train, y_train = sm.fit_resample(x_train, y_train)
+x_train, y_train = sm.fit_resample(x_train, y_train)
 
 x_train = torch.from_numpy(x_train).float().to(device)
 x_test = torch.from_numpy(x_test).float().to(device)
@@ -176,8 +175,8 @@ for i in range(len(x_train)):
     eqn_5 = np.vstack((eqn_5,-i_pert.detach().cpu().numpy())) if eqn_5.size else -i_pert.detach().cpu().numpy()
     model.zero_grad()
     
-np.save('results/eqn_2-test_set_cases-no_smote.npy',eqn_2)
-np.save('results/eqn_5-test_set_cases-no_smote.npy',eqn_5)
+np.save('results/eqn_2-test_set_cases-smote.npy',eqn_2)
+np.save('results/eqn_5-test_set_cases-smote.npy',eqn_5)
 
 elapsed_time = time.time()-start_time
 # np.save('results/mlp_influence_time',elapsed_time)
